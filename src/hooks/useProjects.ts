@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import type { Project, ProjectState } from '../types/project';
-import type { TranslationState, TranslationEntry } from '../types/translation';
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
+import type { Project, ProjectState } from "../types/project";
+import type { TranslationState, TranslationEntry } from "../types/translation";
 
 export function useProjects() {
   const [projectState, setProjectState] = useState<ProjectState>({
@@ -17,15 +17,15 @@ export function useProjects() {
   const loadProjects = async () => {
     try {
       const { data: projects, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      setProjectState(prev => ({
+      setProjectState((prev) => ({
         ...prev,
-        projects: projects.map(p => ({
+        projects: projects.map((p) => ({
           id: p.id,
           name: p.name,
           createdAt: p.created_at,
@@ -33,14 +33,14 @@ export function useProjects() {
         })),
       }));
     } catch (error) {
-      console.error('Error loading projects:', error);
+      console.error("Error loading projects:", error);
     }
   };
 
   const createProject = async (name: string) => {
     try {
       const { data: project, error } = await supabase
-        .from('projects')
+        .from("projects")
         .insert([{ name }])
         .select()
         .single();
@@ -54,19 +54,19 @@ export function useProjects() {
         updatedAt: project.updated_at,
       };
 
-      setProjectState(prev => ({
+      setProjectState((prev) => ({
         projects: [newProject, ...prev.projects],
         activeProjectId: newProject.id,
       }));
 
       return newProject;
     } catch (error) {
-      console.error('Error creating project:', error);
+      console.error("Error creating project:", error);
     }
   };
 
   const setActiveProject = (projectId: string) => {
-    setProjectState(prev => ({
+    setProjectState((prev) => ({
       ...prev,
       activeProjectId: projectId,
     }));
@@ -75,78 +75,83 @@ export function useProjects() {
   const deleteProject = async (projectId: string) => {
     try {
       const { error } = await supabase
-        .from('projects')
+        .from("projects")
         .delete()
-        .eq('id', projectId);
+        .eq("id", projectId);
 
       if (error) throw error;
 
-      setProjectState(prev => ({
-        projects: prev.projects.filter(p => p.id !== projectId),
-        activeProjectId: prev.activeProjectId === projectId ? null : prev.activeProjectId,
+      setProjectState((prev) => ({
+        projects: prev.projects.filter((p) => p.id !== projectId),
+        activeProjectId:
+          prev.activeProjectId === projectId ? null : prev.activeProjectId,
       }));
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error("Error deleting project:", error);
     }
   };
 
-  const getProjectTranslations = async (projectId: string): Promise<TranslationState> => {
+  const getProjectTranslations = async (
+    projectId: string
+  ): Promise<TranslationState> => {
     try {
       const { data: translations, error } = await supabase
-        .from('translations')
-        .select('*')
-        .eq('project_id', projectId);
+        .from("translations")
+        .select("*")
+        .eq("project_id", projectId);
 
       if (error) throw error;
 
-      const entries: TranslationEntry[] = translations.map(t => ({
+      const entries: TranslationEntry[] = translations.map((t) => ({
         key: t.key,
         values: {
-          en: t.en || '',
-          fr: t.fr || '',
-          it: t.it || '',
+          none: t?.none || "",
+          en: t?.en || "",
+          fr: t?.fr || "",
+          it: t?.it || "",
         },
+        created_at: t.created_at,
+        order: t.order,
       }));
 
-      return { entries, jsonInput: '' };
+      return { entries, jsonInput: "" };
     } catch (error) {
-      console.error('Error loading translations:', error);
-      return { entries: [], jsonInput: '' };
+      console.error("Error loading translations:", error);
+      return { entries: [], jsonInput: "" };
     }
   };
 
-  const updateProjectTranslations = async (projectId: string, translations: TranslationState) => {
+  const updateProjectTranslations = async (
+    projectId: string,
+    translations: TranslationState
+  ) => {
     try {
       // Delete existing translations
-      await supabase
-        .from('translations')
-        .delete()
-        .eq('project_id', projectId);
+      await supabase.from("translations").delete().eq("project_id", projectId);
 
       if (translations.entries.length > 0) {
         // Insert new translations
-        const { error } = await supabase
-          .from('translations')
-          .insert(
-            translations.entries.map(entry => ({
-              project_id: projectId,
-              key: entry.key,
-              en: entry.values.en || '',
-              fr: entry.values.fr || '',
-              it: entry.values.it || '',
-            }))
-          );
+        const { error } = await supabase.from("translations").insert(
+          translations.entries.map((entry) => ({
+            project_id: projectId,
+            key: entry.key,
+            en: entry?.values?.en || "",
+            fr: entry?.values?.fr || "",
+            it: entry?.values?.it || "",
+            order: entry.order,
+          }))
+        );
 
         if (error) throw error;
       }
 
       // Update project timestamp
       await supabase
-        .from('projects')
+        .from("projects")
         .update({ updated_at: new Date().toISOString() })
-        .eq('id', projectId);
+        .eq("id", projectId);
     } catch (error) {
-      console.error('Error updating translations:', error);
+      console.error("Error updating translations:", error);
     }
   };
 

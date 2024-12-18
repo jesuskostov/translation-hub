@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useProjects } from './useProjects';
-import { useTranslationProgress } from './useTranslationProgress';
-import { processJsonInput, updateTranslation } from '../utils/translationUtils';
-import { exportTranslations } from '../utils/exportUtils';
-import type { Language, TranslationEntry, TranslationState } from '../types/translation';
-import type { TranslationHandlers } from '../types/handlers';
+import { useState, useEffect } from "react";
+import { useProjects } from "./useProjects";
+import { useTranslationProgress } from "./useTranslationProgress";
+import { processJsonInput, updateTranslation } from "../utils/translationUtils";
+import { exportTranslations } from "../utils/exportUtils";
+import type {
+  Language,
+  TranslationEntry,
+  TranslationState,
+} from "../types/translation";
+import type { TranslationHandlers } from "../types/handlers";
 
 export function useTranslationManager() {
   const {
@@ -17,20 +21,18 @@ export function useTranslationManager() {
     updateProjectTranslations,
   } = useProjects();
 
-  const [currentTranslations, setCurrentTranslations] = useState<TranslationState | null>(null);
+  const [currentTranslations, setCurrentTranslations] =
+    useState<TranslationState | null>(null);
 
-  const {
-    progress,
-    startTranslation,
-    incrementProgress,
-    finishTranslation,
-  } = useTranslationProgress();
+  const { progress, startTranslation, incrementProgress, finishTranslation } =
+    useTranslationProgress();
 
   // Load translations when activeProjectId changes
   useEffect(() => {
     if (activeProjectId) {
       const loadTranslations = async () => {
         const translations = await getProjectTranslations(activeProjectId);
+
         setCurrentTranslations(translations);
       };
       loadTranslations();
@@ -41,46 +43,64 @@ export function useTranslationManager() {
 
   const handleJsonSubmit = async (jsonInput: string, language: Language) => {
     if (!activeProjectId) return;
-    
+
     try {
       const json = JSON.parse(jsonInput);
       const entries = Object.keys(json);
-      
-      startTranslation(entries.length * 2, language, 'en');
-      
+
+      startTranslation(entries.length * 2, language, "en");
+
+      // Assign order and process translations
       const translatedEntries = await processJsonInput(jsonInput, language, {
         onProgress: incrementProgress,
-      });
-      
+      }).then((result) =>
+        result.map((entry, index: number) => ({
+          ...entry,
+          order: index + 1,
+        }))
+      );
       const newState = { entries: translatedEntries, jsonInput };
+
+      // // Save to the database with the new order field
       await updateProjectTranslations(activeProjectId, newState);
+
       setCurrentTranslations(newState);
       finishTranslation();
     } catch (error) {
-      console.error('Failed to process translations:', error);
+      console.error("Failed to process translations:", error);
       finishTranslation();
     }
   };
 
-  const handleEntryUpdate = async (key: string, language: Language, newValue: string, shouldTranslate = false) => {
+  const handleEntryUpdate = async (
+    key: string,
+    language: Language,
+    newValue: string,
+    shouldTranslate = false
+  ) => {
     if (!activeProjectId || !currentTranslations) return;
-    
-    const entryIndex = currentTranslations.entries.findIndex(entry => entry?.key === key);
+
+    const entryIndex = currentTranslations.entries.findIndex(
+      (entry) => entry?.key === key
+    );
     if (entryIndex === -1) return;
 
     try {
       let updatedEntry;
-      
-      if (shouldTranslate && currentTranslations.entries[entryIndex].values.en) {
-        startTranslation(1, 'en', language);
-        
+
+      if (
+        shouldTranslate &&
+        currentTranslations.entries[entryIndex].values.en
+      ) {
+        startTranslation(1, "en", language);
+
         updatedEntry = await updateTranslation(
           currentTranslations.entries[entryIndex],
-          'en',
+          "en",
           currentTranslations.entries[entryIndex].values.en,
           language
         );
-        
+
         incrementProgress();
         finishTranslation();
       } else {
@@ -88,8 +108,8 @@ export function useTranslationManager() {
           ...currentTranslations.entries[entryIndex],
           values: {
             ...currentTranslations.entries[entryIndex].values,
-            [language]: newValue
-          }
+            [language]: newValue,
+          },
         };
       }
 
@@ -104,14 +124,14 @@ export function useTranslationManager() {
       await updateProjectTranslations(activeProjectId, newState);
       setCurrentTranslations(newState);
     } catch (error) {
-      console.error('Failed to update translation:', error);
+      console.error("Failed to update translation:", error);
       finishTranslation();
     }
   };
 
   const handleAddKey = async (newEntry: TranslationEntry) => {
     if (!activeProjectId || !currentTranslations) return;
-    
+
     const newState = {
       ...currentTranslations,
       entries: [...currentTranslations.entries, newEntry],
@@ -123,10 +143,10 @@ export function useTranslationManager() {
 
   const handleDeleteKey = async (key: string) => {
     if (!activeProjectId || !currentTranslations) return;
-    
+
     const newState = {
       ...currentTranslations,
-      entries: currentTranslations.entries.filter(entry => entry.key !== key),
+      entries: currentTranslations.entries.filter((entry) => entry.key !== key),
     };
 
     await updateProjectTranslations(activeProjectId, newState);

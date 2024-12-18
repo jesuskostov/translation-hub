@@ -1,9 +1,8 @@
-import React from 'react';
-import { ErrorBoundary } from '../ErrorBoundary';
-import { JsonInput } from '../JsonInput';
-import { TranslationTable } from '../TranslationTable';
-import type { TranslationState } from '../../types/translation';
-import type { TranslationHandlers } from '../../types/handlers';
+import { ErrorBoundary } from "../ErrorBoundary";
+import { JsonInput } from "../JsonInput";
+import { TranslationTable } from "../TranslationTable";
+import type { TranslationState } from "../../types/translation";
+import type { TranslationHandlers } from "../../types/handlers";
 
 interface MainContentProps {
   activeProjectId: string | null;
@@ -14,7 +13,7 @@ interface MainContentProps {
 export function MainContent({
   activeProjectId,
   currentTranslations,
-  handlers
+  handlers,
 }: MainContentProps) {
   return (
     <main className="ml-64 p-8">

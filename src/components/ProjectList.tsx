@@ -1,6 +1,5 @@
-import React from 'react';
-import { FolderOpen, Trash2, Clock } from 'lucide-react';
-import type { Project } from '../types/project';
+import { FolderOpen, Trash2, Clock } from "lucide-react";
+import type { Project } from "../types/project";
 
 interface ProjectListProps {
   projects: Project[];
@@ -17,21 +16,25 @@ export function ProjectList({
 }: ProjectListProps) {
   return (
     <div className="space-y-4">
-      {projects.map(project => (
+      {projects.map((project) => (
         <div
           key={project.id}
           className={`p-4 rounded-lg transition-all cursor-pointer ${
             project.id === activeProjectId
-              ? 'bg-blue-50 border-2 border-blue-500'
-              : 'bg-white border border-gray-200 hover:border-blue-300'
+              ? "bg-blue-50 border-2 border-blue-500"
+              : "bg-white border border-gray-200 hover:border-blue-300"
           }`}
           onClick={() => onProjectSelect(project.id)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <FolderOpen className={`w-5 h-5 ${
-                project.id === activeProjectId ? 'text-blue-500' : 'text-gray-400'
-              }`} />
+              <FolderOpen
+                className={`w-5 h-5 ${
+                  project.id === activeProjectId
+                    ? "text-blue-500"
+                    : "text-gray-400"
+                }`}
+              />
               <h3 className="font-medium text-gray-900">{project.name}</h3>
             </div>
             <button

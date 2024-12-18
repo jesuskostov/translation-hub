@@ -1,10 +1,9 @@
-import React from 'react';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import { Header } from './components/Header';
-import { Sidebar } from './components/Layout/Sidebar';
-import { MainContent } from './components/Layout/MainContent';
-import { TranslationLoadingModal } from './components/LoadingModal/TranslationLoadingModal';
-import { useTranslationManager } from './hooks/useTranslationManager';
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { Header } from "./components/Header";
+import { Sidebar } from "./components/Layout/Sidebar";
+import { MainContent } from "./components/Layout/MainContent";
+import { TranslationLoadingModal } from "./components/LoadingModal/TranslationLoadingModal";
+import { useTranslationManager } from "./hooks/useTranslationManager";
 
 export default function App() {
   const {
@@ -12,7 +11,7 @@ export default function App() {
     activeProjectId,
     currentTranslations,
     handlers,
-    translationProgress
+    translationProgress,
   } = useTranslationManager();
 
   return (
@@ -33,15 +32,17 @@ export default function App() {
           currentTranslations={currentTranslations}
           handlers={handlers}
         />
-        
-        {translationProgress.isTranslating && translationProgress.sourceLang && translationProgress.targetLang && (
-          <TranslationLoadingModal
-            progress={translationProgress.progress}
-            total={translationProgress.total}
-            sourceLang={translationProgress.sourceLang}
-            targetLang={translationProgress.targetLang}
-          />
-        )}
+
+        {translationProgress.isTranslating &&
+          translationProgress.sourceLang &&
+          translationProgress.targetLang && (
+            <TranslationLoadingModal
+              progress={translationProgress.progress}
+              total={translationProgress.total}
+              sourceLang={translationProgress.sourceLang}
+              targetLang={translationProgress.targetLang}
+            />
+          )}
       </div>
     </ErrorBoundary>
   );

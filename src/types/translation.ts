@@ -10,11 +10,13 @@ export interface TranslationValue {
 export interface TranslationEntry {
   key: string;
   values: TranslationValue;
+  created_at: string;
+  order: number;
 }
 
 export interface TranslationState {
   entries: TranslationEntry[];
-  jsonInput: string;
+  jsonInput: string; // Add this line
 }
 
 export const LANGUAGES: Record<Language, string> = {
